@@ -35,12 +35,16 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadTransactions(): Promise<void> {
-      const { data } = await api.get('/transactions');
+      const response = await api.get('/transactions');
+      // eslint-disable-next-line no-shadow
+      const { transactions, balance } = response.data;
 
-      const transactionsFormatted = data.transactions.map(
+      const transactionsFormatted = transactions.map(
         (transaction: Transaction) => ({
           ...transaction,
-          formattedValue: formatValue(transaction.value),
+          formattedValue: `${
+            transaction.type === 'outcome' ? ' - ' : ' + '
+          } ${formatValue(transaction.value)}`,
           formattedDate: new Date(transaction.created_at).toLocaleDateString(
             'pt-br',
           ),
@@ -48,9 +52,9 @@ const Dashboard: React.FC = () => {
       );
 
       const balanceFormatted = {
-        income: formatValue(data.balance.income),
-        outcome: formatValue(data.balance.outcome),
-        total: formatValue(data.balance.total),
+        income: formatValue(balance.income),
+        outcome: formatValue(balance.outcome),
+        total: formatValue(balance.total),
       };
 
       setTransactions(transactionsFormatted);
